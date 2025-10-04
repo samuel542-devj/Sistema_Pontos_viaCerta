@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastrar Aluno</title>
+  <link rel="stylesheet" href="/css/Cadastro.css">
+  <style>
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <button id="deletar">DELETAR</button>
+
+  <!-- Formulário de Cadastro -->
+  <div id="formCadastro" class="form-container">
+    <h1>Cadastrar Novo Aluno</h1>
+    <form action="/admin/cadastrar" method="POST">
+      <input type="text" name="contrato" placeholder="Contrato" required>
+      <input type="text" name="nome" placeholder="Nome" required>
+      <input type="number" name="pontos" placeholder="Pontos iniciais" required>
+      <button type="submit">Cadastrar</button>
+    </form>
+    <a href="/admin/painel">Voltar</a>
+  </div>
+
+  <!-- Formulário de Deletar (escondido por padrão) -->
+  <div id="formDeletar" class="form-container hidden">
+    <h1>Deletar Aluno</h1>
+    <form action="/admin/deletar" method="POST">
+      <input type="text" name="contrato" placeholder="Contrato do aluno" required>
+      <input type="password" name="senha" placeholder="Senha do admin" required>
+      <button type="submit">Deletar</button>
+    </form>
+    <a href="/admin/painel">Voltar</a>
+  </div>
+
+  <script>
+    // Quando clicar no botão "DELETAR"
+    document.getElementById("deletar").addEventListener("click", function() {
+      document.getElementById("formCadastro").classList.add("hidden");
+      document.getElementById("formDeletar").classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>

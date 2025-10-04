@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css"> <!-- puxando CSS separado -->
+</head>
+<body>
+    
+  <div class="login-container">
+    <img src="/assets/Viacerta.png" alt="Logo" id="logo">
+    <h1>Aluno</h1>
+    <form action="/alunos/login" method="POST">
+      <input type="text" name="contrato" placeholder="Número do contrato" required>
+      <button type="submit">Entrar</button>
+    </form>
+    <a href="/admin/login">Sou Admin</a>
+  </div>
+
+  <% if (typeof erro !== 'undefined') { %>
+  <p style="color:red;"><%= erro %></p>
+<% } %>
+
+  
+</body>
+</html>

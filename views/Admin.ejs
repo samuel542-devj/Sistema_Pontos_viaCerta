@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css"> <!-- puxando CSS separado -->
+</head>
+<body>
+    
+  <div class="login-container">
+    <img src="/assets/Viacerta.png" alt="Logo" id="logo">
+    <h1>Admin</h1>
+    <form action="/admin/login" method="POST">
+      <input type="text" name="usuario" placeholder="Usuário" required>
+      <input type="password" name="senha" placeholder="Senha" required>
+      <button type="submit">Entrar</button>
+    </form>
+    <a href="/">Sou Aluno</a>
+  </div>
+</body>
+</html>
+<!-- A URL típica para acessar o servidor depende da configuração do seu backend.
+Se estiver rodando localmente com Express, geralmente é: http://localhost:3000/
+Se estiver hospedado, será o domínio configurado. -->

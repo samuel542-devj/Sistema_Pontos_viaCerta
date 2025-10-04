@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel Admin</title>
+  <link rel="stylesheet" href="/css/stylePainel.css">
+</head>
+<body>
+  <div class="painel-admin">
+    <h1>Painel Administrativo</h1>
+    <p>Bem-vindo, <%= administrador.usuario %></p>
+    <a href="/admin/cadastrar">+ Cadastrar Novo Aluno</a>
+    <a href="/admin/logout" id="btn-logout" style="margin-left:20px;">Logout</a>
+
+    <h2>Pesquisar Aluno</h2>
+    <input type="text" id="filtro-contrato" placeholder="Pesquisar por contrato">
+    <button id="btn-pesquisar" type="button">Pesquisar</button>
+    <button id="btn-limpar" type="button">Mostrar todos</button>
+
+    <h2>Lista de Alunos</h2>
+
+    <!-- FORMULÁRIO PARA ALTERAÇÃO EM LOTE -->
+    <form id="form-lote" action="/admin/alterar-pontos-lote" method="POST">
+      <table border="1" cellpadding="5" id="tabela-alunos">
+        <tr>
+          <th>Selecionar</th>
+          <th>Contrato</th>
+          <th>Nome</th>
+          <th>Pontos</th>
+        </tr>
+        <% alunos.forEach(aluno => { %>
+        <tr>
+          <td><input type="checkbox" class="aluno-checkbox" name="alunosSelecionados" value="<%= aluno.contrato %>"></td>
+          <td class="col-contrato"><%= aluno.contrato %></td>
+          <td><%= aluno.nome %></td>
+          <td><%= aluno.pontos %></td>
+        </tr>
+        <% }) %>
+      </table>
+
+      <div style="margin-top:10px;">
+        <label for="incremento">Quantidade:</label>
+        <input type="number" id="incremento" name="incremento" value="1" style="width:60px;">
+        
+        <button type="submit" class="btn-lote" data-acao="adicionar">Adicionar</button>
+        <button type="submit" class="btn-lote" id="vermelho" data-acao="remover">Remover</button>
+
+        <!-- Botões rápidos -->
+        <button type="button" class="btn-rapido" data-acao="adicionar" data-valor="5">+5 Pontos</button>
+        <button type="button" class="btn-rapido" data-acao="adicionar" data-valor="10">+10 Pontos</button>
+        <button type="button" class="btn-rapido" id="vermelho" data-acao="remover" data-valor="5">-5 Pontos</button>
+        <button type="button" class="btn-rapido"  id="vermelho" data-acao="remover" data-valor="10">-10 Pontos</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>
