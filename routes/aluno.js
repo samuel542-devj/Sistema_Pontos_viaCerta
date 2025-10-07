@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const mysql = require("mysql2");
+// routes/admin.js ou qualquer outro
+const db = require('../db/conn');
 
-// Conexão com o banco
-const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",    // sua senha do MySQL, se tiver
-    database: "sistema_pontos"
-});
+async function listarAlunos() {
+  const [rows] = await db.query('SELECT * FROM alunos');
+  console.log(rows);
+}
+
+
 
 // Rota para exibir tela de login do aluno
 router.get("/index", (req, res) => {

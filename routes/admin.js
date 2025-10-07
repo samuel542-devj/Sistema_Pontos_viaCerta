@@ -1,14 +1,28 @@
 const express = require("express"); 
 const router = express.Router();
-const mysql = require("mysql2");
+// routes/admin.js ou qualquer outro
+const db = require('../db/conn');
 
-// Conexão com o banco
-const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "sistema_pontos"
+async function listarAlunos() {
+  const [rows] = await db.query('SELECT * FROM alunos');
+  console.log(rows);
+}
+
+
+
+// Exemplo de query usando pool (async/await):
+router.get('/alguma-rota', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM alunos LIMIT 10');
+    // use rows...
+    res.render('index', { dados: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro no banco');
+  }
 });
+
+
 
 // ========== LOGIN ==========
 router.get("/login", (req, res) => {
