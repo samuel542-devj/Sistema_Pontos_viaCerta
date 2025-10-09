@@ -15,16 +15,13 @@ app.set("views", path.join(__dirname, "views"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// CORS — permitir que frontend hospedado em domínio acesse o backend
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "*", // idealmente especificar domínio real
-  credentials: true // permitir cookies se usar
+  origin: process.env.FRONTEND_URL || "*",
+  credentials: true
 }));
 
-// Arquivos estáticos
 app.use(express.static(path.join(__dirname, "public")));
 
-// Sessão
 app.use(session({
   secret: process.env.SESSION_SECRET || "segredo_forte",
   resave: false,
@@ -36,15 +33,21 @@ app.use(session({
 }));
 
 // Rotas
-app.use("/alunos", require("./routes/aluno"));
 app.use("/admin", require("./routes/admin"));
 
-// Rota principal
-app.get("/", (req, res) => {
-  res.render("index");
+// Rota principal / alunos
+const db = require("./db/conn");
+app.get("/", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM alunos ORDER BY contrato ASC");
+    res.render("index", { dados: result.rows }); // index.ejs
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Erro ao buscar alunos.");
+  }
 });
 
-// 404 — rota não encontrada
+// 404
 app.use((req, res, next) => {
   res.status(404).send("Página não encontrada");
 });
