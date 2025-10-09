@@ -1,18 +1,20 @@
 // db/conn.js
-const mysql = require('mysql2/promise');
+const { Pool } = require('pg');
 const dotenv = require('dotenv');
+const { text } = require('body-parser');
 
 dotenv.config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false } // necessário no Neon e Render
 });
 
-module.exports = pool;
+pool.connect()
+  .then(() => console.log("✅ Conectado ao banco de dados PostgreSQL (Neon)"))
+  .catch(err => console.error("❌ Erro ao conectar ao banco:", err));
+
+module.exports = {
+  query: (text, params) => pool.query(text, params),
+};
+  
