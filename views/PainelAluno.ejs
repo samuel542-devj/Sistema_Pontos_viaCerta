@@ -4,17 +4,18 @@
   <meta charset="UTF-8">
   <title>Painel do Aluno</title>
   <link rel="stylesheet" href="/css/styleP.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
 <body>
   <div class="painel-aluno">
     <h1>Bem-vindo, <span><%= aluno.nome %></span>!</h1>
-    
+
     <div class="info">
       <p><strong>Número do contrato:</strong> <span><%= aluno.contrato %></span></p>
       <p><strong>Seus pontos:</strong> <span><%= aluno.pontos %></span></p>
     </div>
 
-    <a href="/" class="btn-sair">Sair</a>
+    <a href="/alunos/sair" class="btn-sair">Sair</a>
   </div>
 </body>
 </html>

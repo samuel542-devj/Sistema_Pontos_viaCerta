@@ -22,15 +22,7 @@ app.use(cors({
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || "segredo_forte",
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true
-  }
-}));
+
 
 // Rotas
 app.use("/admin", require("./routes/admin"));
@@ -57,5 +49,9 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send("Algo deu errado!");
 });
+
+
+const db = require("./db/conn");
+
 
 module.exports = app;

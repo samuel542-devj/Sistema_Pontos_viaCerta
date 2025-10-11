@@ -1,10 +1,12 @@
+// routes/admin.js
 const express = require("express");
 const router = express.Router();
 const db = require("../db/conn");
 
-// LOGIN ADMIN
-router.get("/login", (req, res) => res.render("Admin")); // Admin.ejs
+// tela login
+router.get("/login", (req, res) => res.render("Admin"));
 
+// login simples (senha em texto)
 router.post("/login", async (req, res) => {
   const { usuario, senha } = req.body;
   try {
@@ -21,7 +23,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// PAINEL ADMIN
+// painel
 router.get("/painel", async (req, res) => {
   if (!req.session.administrador) return res.redirect("/admin/login");
   try {
@@ -36,7 +38,7 @@ router.get("/painel", async (req, res) => {
   }
 });
 
-// CADASTRAR ALUNO
+// cadastrar (form)
 router.get("/cadastrar", (req, res) => {
   if (!req.session.administrador) return res.redirect("/admin/login");
   res.render("CadastrarAluno");
@@ -48,7 +50,7 @@ router.post("/cadastrar", async (req, res) => {
   try {
     await db.query(
       "INSERT INTO alunos (contrato, nome, pontos) VALUES ($1, $2, $3)",
-      [contrato, nome, pontos]
+      [contrato, nome, pontos || 0]
     );
     res.redirect("/admin/painel");
   } catch (err) {
@@ -58,7 +60,7 @@ router.post("/cadastrar", async (req, res) => {
   }
 });
 
-// ALTERAR PONTOS INDIVIDUAL
+// alterar pontos individual
 router.post("/alterar-pontos", async (req, res) => {
   if (!req.session.administrador) return res.redirect("/admin/login");
   const { contrato, pontos } = req.body;
@@ -71,16 +73,17 @@ router.post("/alterar-pontos", async (req, res) => {
   }
 });
 
-// ALTERAR PONTOS EM LOTE
+// alterar pontos em lote
 router.post("/alterar-pontos-lote", async (req, res) => {
   if (!req.session.administrador) return res.redirect("/admin/login");
   let { alunosSelecionados, incremento } = req.body;
-  const acao = req.query.acao;
+  const acao = req.query.acao; // se usar ?acao=remover
   if (!alunosSelecionados) return res.send("Nenhum aluno selecionado.");
   incremento = parseInt(incremento) || 0;
   if (acao === "remover") incremento = -incremento;
   const contratos = Array.isArray(alunosSelecionados) ? alunosSelecionados : [alunosSelecionados];
   try {
+    // usamos cast explícito para text[]
     await db.query(
       "UPDATE alunos SET pontos = pontos + $1 WHERE contrato = ANY($2::text[])",
       [incremento, contratos]
@@ -92,22 +95,22 @@ router.post("/alterar-pontos-lote", async (req, res) => {
   }
 });
 
-// LOGOUT
-router.get("/logout", (req, res) => {
-  req.session.destroy(() => res.redirect("/admin/login"));
-});
-
-// DELETAR ALUNO
+// deletar
 router.post("/deletar", async (req, res) => {
   if (!req.session.administrador) return res.redirect("/admin/login");
   const { contrato } = req.body;
   try {
-    const result = await db.query("DELETE FROM alunos WHERE contrato = $1", [contrato]);
+    await db.query("DELETE FROM alunos WHERE contrato = $1", [contrato]);
     res.redirect("/admin/painel");
   } catch (err) {
     console.error(err);
     res.send("Erro ao deletar aluno.");
   }
+});
+
+// logout
+router.get("/logout", (req, res) => {
+  req.session.destroy(() => res.redirect("/admin/login"));
 });
 
 module.exports = router;
