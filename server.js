@@ -1,4 +1,3 @@
-// server.js
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
@@ -17,18 +16,22 @@ app.set("views", path.join(__dirname, "views"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
+
+// CORS — importante se o front estiver separado
 app.use(cors({
   origin: process.env.FRONTEND_URL || "*",
-  credentials: true
+  credentials: true,
 }));
 
+// Sessões (fundamental corrigir aqui)
 app.use(session({
-  secret: process.env.SESSION_SECRET || "segredo_forte",
+  secret: process.env.SESSION_SECRET || "SamuelSistemaPontos@2025!",
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true
+    secure: process.env.NODE_ENV === "production", // usa HTTPS no Render
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
   }
 }));
 
@@ -36,10 +39,9 @@ app.use(session({
 app.use("/alunos", require("./routes/aluno"));
 app.use("/admin", require("./routes/admin"));
 
-// rota raiz -> redireciona para /alunos (onde listagem já é feita)
 app.get("/", (req, res) => res.redirect("/alunos"));
 
-// 404 / error
+// Tratamento de erros
 app.use((req, res) => res.status(404).send("Página não encontrada"));
 app.use((err, req, res, next) => {
   console.error(err.stack);

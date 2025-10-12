@@ -1,31 +1,45 @@
-// routes/admin.js
 const express = require("express");
 const router = express.Router();
 const db = require("../db/conn");
 
-// tela login
-router.get("/login", (req, res) => res.render("Admin"));
+// ===================== LOGIN =====================
+router.get("/login", (req, res) => {
+  res.render("Admin");
+});
 
-// login simples (senha em texto)
 router.post("/login", async (req, res) => {
   const { usuario, senha } = req.body;
+
   try {
     const result = await db.query(
       "SELECT * FROM administrador WHERE usuario = $1 AND senha = $2",
       [usuario, senha]
     );
-    if (result.rows.length === 0) return res.send("Usuário ou senha incorretos.");
+
+    if (result.rows.length === 0) {
+      console.log("❌ Usuário ou senha incorretos");
+      return res.render("Admin", { erro: "Usuário ou senha incorretos" });
+    }
+
+    // Salva o usuário logado na sessão
     req.session.administrador = result.rows[0];
-    res.redirect("/admin/painel");
+    console.log("✅ Login bem-sucedido:", req.session.administrador.usuario);
+
+    // Redireciona para o painel
+    return res.redirect("/admin/painel");
   } catch (err) {
-    console.error(err);
-    res.send("Erro no servidor.");
+    console.error("Erro no login:", err);
+    return res.status(500).send("Erro no servidor.");
   }
 });
 
-// painel
+// ===================== PAINEL ADMIN =====================
 router.get("/painel", async (req, res) => {
-  if (!req.session.administrador) return res.redirect("/admin/login");
+  if (!req.session.administrador) {
+    console.log("🔒 Sessão expirada ou não logada.");
+    return res.redirect("/admin/login");
+  }
+
   try {
     const result = await db.query("SELECT * FROM alunos ORDER BY contrato ASC");
     res.render("PainelAdmin", {
@@ -33,12 +47,12 @@ router.get("/painel", async (req, res) => {
       alunos: result.rows,
     });
   } catch (err) {
-    console.error(err);
-    res.send("Erro ao buscar alunos.");
+    console.error("Erro ao buscar alunos:", err);
+    res.status(500).send("Erro ao buscar alunos.");
   }
 });
 
-// cadastrar (form)
+// ===================== CADASTRAR ALUNO =====================
 router.get("/cadastrar", (req, res) => {
   if (!req.session.administrador) return res.redirect("/admin/login");
   res.render("CadastrarAluno");
@@ -46,6 +60,7 @@ router.get("/cadastrar", (req, res) => {
 
 router.post("/cadastrar", async (req, res) => {
   if (!req.session.administrador) return res.redirect("/admin/login");
+
   const { contrato, nome, pontos } = req.body;
   try {
     await db.query(
@@ -54,63 +69,36 @@ router.post("/cadastrar", async (req, res) => {
     );
     res.redirect("/admin/painel");
   } catch (err) {
-    if (err.code === "23505") return res.send("Contrato já existe. Use outro contrato.");
-    console.error(err);
-    res.send("Erro ao cadastrar aluno.");
+    if (err.code === "23505")
+      return res.send("Contrato já existe. Use outro contrato.");
+    console.error("Erro ao cadastrar aluno:", err);
+    res.status(500).send("Erro ao cadastrar aluno.");
   }
 });
 
-// alterar pontos individual
+// ===================== ALTERAR PONTOS =====================
 router.post("/alterar-pontos", async (req, res) => {
   if (!req.session.administrador) return res.redirect("/admin/login");
+
   const { contrato, pontos } = req.body;
   try {
-    await db.query("UPDATE alunos SET pontos = $1 WHERE contrato = $2", [pontos, contrato]);
+    await db.query("UPDATE alunos SET pontos = $1 WHERE contrato = $2", [
+      pontos,
+      contrato,
+    ]);
     res.redirect("/admin/painel");
   } catch (err) {
-    console.error(err);
-    res.send("Erro ao atualizar pontos.");
+    console.error("Erro ao atualizar pontos:", err);
+    res.status(500).send("Erro ao atualizar pontos.");
   }
 });
 
-// alterar pontos em lote
-router.post("/alterar-pontos-lote", async (req, res) => {
-  if (!req.session.administrador) return res.redirect("/admin/login");
-  let { alunosSelecionados, incremento } = req.body;
-  const acao = req.query.acao; // se usar ?acao=remover
-  if (!alunosSelecionados) return res.send("Nenhum aluno selecionado.");
-  incremento = parseInt(incremento) || 0;
-  if (acao === "remover") incremento = -incremento;
-  const contratos = Array.isArray(alunosSelecionados) ? alunosSelecionados : [alunosSelecionados];
-  try {
-    // usamos cast explícito para text[]
-    await db.query(
-      "UPDATE alunos SET pontos = pontos + $1 WHERE contrato = ANY($2::text[])",
-      [incremento, contratos]
-    );
-    res.redirect("/admin/painel");
-  } catch (err) {
-    console.error(err);
-    res.send("Erro ao atualizar pontos em lote.");
-  }
-});
-
-// deletar
-router.post("/deletar", async (req, res) => {
-  if (!req.session.administrador) return res.redirect("/admin/login");
-  const { contrato } = req.body;
-  try {
-    await db.query("DELETE FROM alunos WHERE contrato = $1", [contrato]);
-    res.redirect("/admin/painel");
-  } catch (err) {
-    console.error(err);
-    res.send("Erro ao deletar aluno.");
-  }
-});
-
-// logout
+// ===================== LOGOUT =====================
 router.get("/logout", (req, res) => {
-  req.session.destroy(() => res.redirect("/admin/login"));
+  req.session.destroy(() => {
+    console.log("👋 Sessão encerrada.");
+    res.redirect("/admin/login");
+  });
 });
 
 module.exports = router;
