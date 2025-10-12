@@ -8,43 +8,48 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// EJS
+// ====== EJS ======
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Middlewares
+// ====== MIDDLEWARES ======
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// CORS — importante se o front estiver separado
+// ====== CORS ======
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "*",
+  origin: process.env.FRONTEND_URL || true, // permite frontend hospedado no mesmo domínio
   credentials: true,
 }));
 
-// Sessões (fundamental corrigir aqui)
+// ====== TRUST PROXY (ESSENCIAL PARA RENDER) ======
+app.set("trust proxy", 1); // força reconhecimento de HTTPS no Render
+
+// ====== SESSÃO ======
 app.use(session({
+  name: "sessao_viacerta", // nome do cookie
   secret: process.env.SESSION_SECRET || "SamuelSistemaPontos@2025!",
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === "production", // usa HTTPS no Render
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+    secure: process.env.NODE_ENV === "production", // obriga HTTPS no Render
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 1000 * 60 * 60 * 2 // 2 horas
   }
 }));
 
-// Rotas
+// ====== ROTAS ======
 app.use("/alunos", require("./routes/aluno"));
 app.use("/admin", require("./routes/admin"));
 
 app.get("/", (req, res) => res.redirect("/alunos"));
 
-// Tratamento de erros
+// ====== ERROS ======
 app.use((req, res) => res.status(404).send("Página não encontrada"));
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error("Erro geral:", err.stack);
   res.status(500).send("Algo deu errado!");
 });
 
