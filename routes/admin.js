@@ -102,11 +102,19 @@ router.get("/logout", (req, res) => {
 });
 
 router.post("/deletar", async (req, res) => {
+  console.log("Tentando deletar aluno:", req.body.contrato);
   if (!req.session.administrador) return res.redirect("/admin/login");
-  const { contrato } = req.body;
-  // ...
-});
 
+  const { contrato } = req.body;
+  try {
+    const result = await db.query("DELETE FROM alunos WHERE contrato = $1", [contrato]);
+    console.log("Resultado do delete:", result);
+    res.redirect("/admin/painel");
+  } catch (err) {
+    console.error("Erro ao deletar aluno:", err);
+    res.status(500).send("Erro ao deletar aluno.");
+  }
+});
 
 
 
