@@ -101,4 +101,13 @@ router.get("/logout", (req, res) => {
   });
 });
 
+router.post("/deletar", async (req, res) => {
+  if (!req.session.administrador) return res.redirect("/admin/login");
+  const { contrato } = req.body;
+  // ...
+});
+
+
+
+
 module.exports = router;
